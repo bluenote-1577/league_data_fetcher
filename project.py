@@ -10,7 +10,6 @@ def getSnowballEffect():
 	winningdiff_mid													  
 	losingdiff_early 
 	losingdiff_mid 
-	
 	avgGood = 0
 	avgBad = 0
 	
