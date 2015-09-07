@@ -5,6 +5,80 @@ import time
 import urllib
 import pdb
 
+def getSnowballEffect():
+	winningdiff_early 
+	winningdiff_mid													  
+	losingdiff_early 
+	losingdiff_mid 
+	
+	avgGood = 0
+	avgBad = 0
+	
+	for index in range (0,len(winningdiff_early)):
+		newNumA = winningdiff_early[index]
+		newNumB = winningdiff_mid[index]
+		if newNumA > 0 :
+			if newNumA < newNumB:
+				if newNumA/newNumB > 0.5:
+					avgGood += newNumB - newNumA
+				else : 
+					avgGood += newNumA
+			else :	
+				toAdd = newNumA-newNumB
+				if toAdd <= newNumA:
+					avgGood -= toAdd
+				else:
+					avgGood -= newNumA
+		else:
+			newNumA = -newNumA			
+			newNumB = -newNumB
+			if newNumA < newNumB:
+				if newNumA/newNumB > 0.5:
+					avgGood += newNumB - newNumA
+				else : 
+					avgGood += newNumA
+			else :	
+				toAdd = newNumA-newNumB
+				if toAdd <= newNumA:
+					avgGood -= toAdd
+				else:
+					avgGood -= newNumA
+	
+	for index in range (0,len(losingdiff_early)):
+		newNumA = losingdiff_early[index]
+		newNumB = losingdiff_mid[index]
+		if newNumA > 0 :
+			if newNumA < newNumB:
+				if newNumA/newNumB > 0.5:
+					avgBad += newNumB - newNumA
+				else : 
+					avgBad += newNumA
+			else :	
+				toAdd = newNumA-newNumB
+				if toAdd <= newNumA:
+					avgBad -= toAdd
+				else:
+					avgBad -= newNumA
+		else:
+			newNumA = -newNumA			
+			newNumB = -newNumB
+			if newNumA < newNumB:
+				if newNumA/newNumB > 0.5:
+					avgBad += newNumB - newNumA
+				else : 
+					avgBad += newNumA
+			else :	
+				toAdd = newNumA-newNumB
+				if toAdd <= newNumA:
+					avgBad -= toAdd
+				else:
+					avgBad -= newNumA
+	if avgGood != 0:
+		avgGood = avgGood/len(winningdiff_early)
+	if avgBad != 0:	
+		avgBad = avgBad/len(losingdiff_early)
+	thislist = [avgGood,avgBad]
+	return thislist
 
 def getSummonerId():
 	summoner_initial = raw_input('Enter summoner name lowercase and without spaces : ')
@@ -46,10 +120,13 @@ def getXpDiff():
 	printnumber = 0
 	for matchnumber in match_ids:
 		response3 = requests.get(url+requestType+str(matchnumber)+'?includeTimeline=true&'+key)
-		time.sleep(6)
+		time.sleep(1)
 		while response3.status_code != 200:
 			print response3.status_code
-			time.sleep(20)
+			if response3.status_code == 429:
+				time.sleep(20)
+			else:
+				break
 			response3 = requests.get(url+requestType+str(matchnumber)+'?includeTimeline=true&'+key)
 		matchinfo = response3.json()
 		print printnumber
@@ -92,15 +169,18 @@ def plotStuff(list1,list2,lista,listb):
 	plt.plot(length1,list1,'ro',label = '0-10 Mins')
 	plt.plot(length1,list2,'bo',label = '10-20 Mins')
 	plt.plot((0,len(list1)),(avg(list1),avg(list1)), 'r-', 
-			 (0,len(list1)),(avg(list2),avg(list2)),'b-')
-	plt.title ('Winning xp differences 0-10,10-20')
+			 (0,len(list1)),(avg(list2),avg(list2)),'b-',
+			 (0, len(list1)), (0,0),'g-')
+	plt.title ('Winning xp differences 0-10,10-20 for player : ' + str(summoner_id))
 	plt.axis([0,len(list1),-350,350])
 	plt.ylabel('XP Difference/Minute')
 	plt.legend()
-	
+	plt.text(0.1,280, ('Snowball effect: ' + str(int(snowball[0])) + ' , ' + 
+					   str(int(snowball[1]))) , fontsize = 13)
 	plt.subplot(212)
 	plt.plot(length2,lista,'ro',length2,listb,'bo',(0,len(lista)),(avg(lista),avg(lista)), 'r-', 
-			 (0,len(lista)),(avg(listb),avg(listb)),'b-',)
+			(0,len(lista)),(avg(listb),avg(listb)),'b-',
+			(0, len(lista)), (0,0),'g-')
 	plt.title('Losing xp differences 0-10,10-20')
 	plt.axis([0,len(lista),-350,350])
 	plt.ylabel('XP Difference/Minute')
@@ -114,6 +194,8 @@ def plotStuff(list1,list2,lista,listb):
 	print avg(lista)
 	print 'Average xpDiff 10-20 for losses : ',
 	print avg(listb)
+	print 'Average snowball effect for good starts : ' + str(snowball[0])
+	print 'Average snowball effect for bad starts : ' + str(snowball[1])
 
 def avg(list):
 	average = 0
@@ -129,12 +211,14 @@ winningdiff_mid =[]
 losingdiff_early = []
 losingdiff_mid = []
 match_ids = []
+snowball = []
 
 summoner_id = getSummonerId()
 role = getMatchList()
 if role == 'MID':
 	role = 'MIDDLE'
 getXpDiff()
+snowball = getSnowballEffect()
 
 plotStuff(winningdiff_early,winningdiff_mid,losingdiff_early,losingdiff_mid)
 
