@@ -93,7 +93,7 @@ def getSummonerId():
 	return summoner_id
 
 
-def getMatchList():
+def getMatchList(summoner_id,match_ids):
 	games = raw_input("Please enter sample size : ")
 	que_type = '?rankedQueues=RANKED_SOLO_5x5&'
 	indices = 'beginIndex=0&endIndex=' + str(games)+'&'
@@ -113,7 +113,7 @@ def getMatchList():
 	print str(len(match_ids)) + " Games as a " + role
 	return role
 
-def getXpDiff():
+def getXpDiff(match_ids,role):
 	clearList()
 	requestType = 'v2.2/match/'
 	printnumber = 0
@@ -155,7 +155,7 @@ def clearList():
 	del losingdiff_early[:]
 	del losingdiff_mid[:]
 	
-def plotStuff(list1,list2,lista,listb):
+def plotStuff(list1,list2,lista,listb,summoner_id,snowball):
 	
 	length1 = []
 	length2 = []
@@ -201,26 +201,30 @@ def avg(list):
 	for number in list:
 		average += number
 	if len(list) != 0:	
-		return average / len(list)	
-				
+		return average / len(list)
+	
 key = 'api_key=b77f2e1b-ef99-4b51-a40f-7eae9d4fb72b'
 url = 'https://na.api.pvp.net/api/lol/na/'
 winningdiff_early = []
 winningdiff_mid =[]														  
 losingdiff_early = []
 losingdiff_mid = []
-match_ids = []
-snowball = []
+def main():				
 
-summoner_id = getSummonerId()
-role = getMatchList()
-if role == 'MID':
-	role = 'MIDDLE'
-getXpDiff()
-snowball = getSnowballEffect()
+	match_ids = []
+	snowball = []
 
-plotStuff(winningdiff_early,winningdiff_mid,losingdiff_early,losingdiff_mid)
+	summoner_id = getSummonerId()
+	role = getMatchList(summoner_id,match_ids)
+	if role == 'MID':
+		role = 'MIDDLE'
+	getXpDiff(match_ids,role)
+	snowball = getSnowballEffect()
 
+	plotStuff(winningdiff_early,winningdiff_mid,losingdiff_early,losingdiff_mid,summoner_id,snowball)
+
+if __name__ == "__main__":
+	main()
 
 
 #print matchcontainer['matches'][0]['participants']
